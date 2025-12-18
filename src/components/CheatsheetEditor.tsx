@@ -640,7 +640,7 @@ export const CheatsheetEditor = ({ cheatsheetId, onBack, onOpenSettings }: Cheat
           <div className="flex gap-2">
             <Dialog open={open} onOpenChange={setOpen}>
               <DialogTrigger asChild>
-                <Button className="bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 text-primary-foreground shadow-lg shadow-primary/20">
+                <Button className="hover:primary/90 text-primary-foreground shadow-lg shadow-primary/20">
                   <Plus className="h-4 w-4 mr-2" />
                   Add Entry
                 </Button>
@@ -753,7 +753,7 @@ export const CheatsheetEditor = ({ cheatsheetId, onBack, onOpenSettings }: Cheat
                             className={cn(
                               "px-2.5 py-1 text-xs font-medium rounded-md border transition-colors",
                               language === lang.value
-                                ? "bg-primary text-primary-foreground border-primary"
+                                ? "bg-primary text-primary-foreground border-amber-500/40"
                                 : "bg-muted/50 text-muted-foreground border-border hover:bg-muted hover:text-foreground"
                             )}
                           >
@@ -878,7 +878,7 @@ export const CheatsheetEditor = ({ cheatsheetId, onBack, onOpenSettings }: Cheat
                   <div className="flex gap-2 pt-2">
                     <Button 
                       onClick={handleSaveEntry} 
-                      className="flex-1 bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 text-primary-foreground"
+                      className="flex-1 bg-primary hover:primary/90 text-primary-foreground"
                       disabled={isGenerating || !syntax.trim() || !category.trim()}
                     >
                       Save Entry

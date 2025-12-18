@@ -101,13 +101,15 @@ export const CheatsheetList = ({ onSelectCheatsheet, onSignOut, onOpenSettings }
       {/* Header */}
       <header className="sticky top-0 z-20 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="rounded-lg bg-gradient-to-br from-primary to-accent p-2">
-              <BookOpen className="h-5 w-5 text-primary-foreground" />
+          <div className="flex items-center gap-1">
+            <div>
+            {/* <div className="rounded-lg bg-gradient-to-br from-primary to-accent p-2"> */}
+              <img className="h-10 w-10" src="logo.png" alt="logo" />
+              {/* <BookOpen className="h-5 w-5 text-primary-foreground" /> */}
             </div>
             <div>
-              <h1 className="text-xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-                recap.
+              <h1 className="text-xl font-bold font-bricolage font-white">
+                recap<span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">.</span>
               </h1>
             </div>
           </div>
