@@ -1,5 +1,6 @@
 import { useApp } from "@/contexts/AppContext";
 import { useToast } from "@/hooks/use-toast";
+import { GoogleGenerativeAI, SchemaType } from "@google/generative-ai";
 
 interface GenerateParams {
   syntax: string;
@@ -52,62 +53,49 @@ Detect the programming language from the syntax and category context, or use the
       ? `${customPrompt}\n\nNow explain this ${category} syntax: ${syntax}`
       : `Explain this ${category} syntax: ${syntax}`;
 
-    try {
-      const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=' + config.geminiApiKey, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
+
+  try {
+    const genAI = new GoogleGenerativeAI(config.geminiApiKey);
+
+    const model = genAI.getGenerativeModel({
+      model: "gemini-3-flash-preview",
+      generationConfig: {
+        responseMimeType: "application/json",
+        responseSchema: {
+          type: SchemaType.OBJECT,
+          properties: {
+            description: { type: SchemaType.STRING },
+            example: { type: SchemaType.STRING },
+            language: { type: SchemaType.STRING },
+          },
+          required: ["description", "example", "language"],
         },
-        body: JSON.stringify({
-          contents: [
-            {
-              parts: [
-                { text: systemPrompt + "\n\n" + userMessage }
-              ]
-            }
-          ],
-          generationConfig: {
-            temperature: 0.3,
-          }
-        }),
-      });
+      },
+    });
 
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        if (response.status === 429) {
-          throw new Error("Rate limit exceeded. Please try again later.");
-        }
-        throw new Error(errorData.error?.message || `API error: ${response.status}`);
-      }
+    const result = await model.generateContent(systemPrompt + "\n\n" + userMessage);
+    
+    const data = JSON.parse(result.response.text());
 
-      const data = await response.json();
-      const content = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
+    return {
+      description: data.description,
+      example: data.example,
+      language: data.language || "javascript",
+    };
 
-      // Parse the JSON response
-      const jsonMatch = content.match(/\{[\s\S]*\}/);
-      if (jsonMatch) {
-        const parsed = JSON.parse(jsonMatch[0]);
-        return {
-          description: parsed.description || "",
-          example: parsed.example || "",
-          language: parsed.language || language || "javascript",
-        };
-      }
-
-      // Fallback
-      return {
-        description: content,
-        example: "",
-        language: language || "javascript",
-      };
-    } catch (error: any) {
-      toast({
-        title: "AI Error",
-        description: error.message || "Failed to generate content",
-        variant: "destructive",
-      });
-      return null;
+  } catch (error) {
+    // Handle specific API errors
+    if (error.message.includes("429")) {
+      throw new Error("Rate limit exceeded. Please try again later.");
     }
+    if (error.message.includes("401") || error.message.includes("API key")) {
+      throw new Error("Invalid API Key. Please check your settings.");
+    }
+    
+    // General error fallback
+    console.error("AI Generation Error:", error);
+    throw new Error("Failed to generate content.");
+  }
   };
 
   return { generate, hasGemini };
