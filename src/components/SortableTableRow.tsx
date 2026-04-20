@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { Button } from "@/components/ui/button";
@@ -15,6 +16,7 @@ interface SortableTableRowProps {
 export const SortableTableRow = ({ entry, onEdit, onDelete }: SortableTableRowProps) => {
   const { resolvedTheme } = useTheme();
   const isDark = resolvedTheme === 'dark';
+  const [isHovered, setIsHovered] = useState(false);
   
   const {
     attributes,
@@ -35,7 +37,9 @@ export const SortableTableRow = ({ entry, onEdit, onDelete }: SortableTableRowPr
     <tr 
       ref={setNodeRef} 
       style={style}
-      className="border-b border-border/50 hover:bg-muted/20 transition-colors group"
+      className="border-b border-border/50 hover:bg-muted/20 transition-colors"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
     >
       <td className="p-3">
         <div className="cursor-grab active:cursor-grabbing" {...attributes} {...listeners}>
@@ -55,6 +59,8 @@ export const SortableTableRow = ({ entry, onEdit, onDelete }: SortableTableRowPr
             <SyntaxHighlighter
               language={entry.language || "javascript"}
               style={isDark ? vscDarkPlus : oneLight}
+              wrapLines={true}
+              wrapLongLines={true}
               customStyle={{
                 margin: 0,
                 borderRadius: '0.25rem',
@@ -67,12 +73,12 @@ export const SortableTableRow = ({ entry, onEdit, onDelete }: SortableTableRowPr
         )}
       </td>
       <td className="p-3 align-top">
-        <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+        <div className={`flex gap-1 justify-end transition-opacity ${isHovered ? 'opacity-100' : 'opacity-0'}`}>
           <Button 
             variant="ghost" 
             size="sm" 
             onClick={() => onEdit(entry)}
-            className="hover:bg-primary/10 text-primary"
+            className="h-7 w-7 p-0 hover:bg-primary/10 text-primary"
           >
             <Edit className="h-3 w-3" />
           </Button>
@@ -80,7 +86,7 @@ export const SortableTableRow = ({ entry, onEdit, onDelete }: SortableTableRowPr
             variant="ghost" 
             size="sm" 
             onClick={() => onDelete(entry.id)}
-            className="hover:bg-destructive/10 text-destructive"
+            className="h-7 w-7 p-0 hover:bg-destructive/10 text-destructive"
           >
             <Trash2 className="h-3 w-3" />
           </Button>

@@ -1201,11 +1201,11 @@ export const CheatsheetEditor = ({ cheatsheetId, onBack, onOpenSettings }: Cheat
                           >
                             <table className="w-full table-fixed">
                               <thead>
-                                <tr className="border-b border-slate-800 bg-slate-800/30">
+                                <tr className="border-b border-border bg-muted/40">
                                   <th className="w-10"></th>
-                                  <th className="text-left p-3 font-semibold text-sm text-slate-300 w-[120px]">Syntax</th>
-                                  <th className="text-left p-3 font-semibold text-sm text-slate-300 w-[180px]">Description</th>
-                                  <th className="text-left p-3 font-semibold text-sm text-slate-300">Example</th>
+                                  <th className="text-left p-3 font-semibold text-sm text-muted-foreground w-[120px]">Syntax</th>
+                                  <th className="text-left p-3 font-semibold text-sm text-muted-foreground w-[180px]">Description</th>
+                                  <th className="text-left p-3 font-semibold text-sm text-muted-foreground">Example</th>
                                   <th className="w-16"></th>
                                 </tr>
                               </thead>
@@ -1233,7 +1233,7 @@ export const CheatsheetEditor = ({ cheatsheetId, onBack, onOpenSettings }: Cheat
 
                   {/* Compact Format */}
                   {compactEntries.length > 0 && (
-                    <Card className="mb-6 bg-slate-900/30 border-slate-800/50">
+                    <Card className="mb-6 bg-muted/20 border-border/50">
                       <CardContent className="p-4">
                         <DndContext
                           sensors={sensors}
