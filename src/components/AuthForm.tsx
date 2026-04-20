@@ -14,7 +14,7 @@ interface AuthFormProps {
 }
 
 export const AuthForm = ({ onOpenSettings }: AuthFormProps) => {
-  const { supabaseClient } = useApp();
+  const { supabaseClient, isPasswordRecovery, clearPasswordRecovery } = useApp();
   const [view, setView] = useState<AuthView>("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -22,13 +22,12 @@ export const AuthForm = ({ onOpenSettings }: AuthFormProps) => {
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
 
-  // Detect password recovery token in URL hash (Supabase puts it there after redirect)
+  // Switch to reset view when AppContext detects PASSWORD_RECOVERY event
   useEffect(() => {
-    const hash = window.location.hash;
-    if (hash.includes("type=recovery")) {
+    if (isPasswordRecovery) {
       setView("reset");
     }
-  }, []);
+  }, [isPasswordRecovery]);
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -72,7 +71,7 @@ export const AuthForm = ({ onOpenSettings }: AuthFormProps) => {
       } else if (view === "reset") {
         const { error } = await supabaseClient.auth.updateUser({ password: newPassword });
         if (error) throw error;
-        // Clear the hash so the reset view doesn't persist on reload
+        clearPasswordRecovery();
         window.history.replaceState(null, "", window.location.pathname);
         toast({ title: "Password updated!", description: "You can now sign in with your new password." });
         setView("login");
@@ -198,7 +197,7 @@ export const AuthForm = ({ onOpenSettings }: AuthFormProps) => {
               </button>
             )}
 
-            {(view === "forgot" || view === "reset") && (
+            {view === "forgot" && (
               <button
                 type="button"
                 onClick={() => setView("login")}

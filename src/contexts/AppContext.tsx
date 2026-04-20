@@ -10,6 +10,8 @@ interface AppContextType {
   session: Session | null;
   isLoading: boolean;
   hasGemini: boolean;
+  isPasswordRecovery: boolean;
+  clearPasswordRecovery: () => void;
   updateConfig: (config: Partial<AppConfig>) => void;
   clearConfig: () => void;
   signOut: () => Promise<void>;
@@ -28,6 +30,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isPasswordRecovery, setIsPasswordRecovery] = useState(false);
 
   const mode = config.supabaseUrl && config.supabaseAnonKey ? "cloud" : "guest";
   const hasGemini = !!config.geminiApiKey;
@@ -57,11 +60,18 @@ export function AppProvider({ children }: { children: ReactNode }) {
         });
         setSupabaseClient(client);
 
-        // Set up auth listener
+        // Set up auth listener — intercept PASSWORD_RECOVERY before treating as logged in
         const { data: { subscription } } = client.auth.onAuthStateChange(
-          (_event, session) => {
-            setSession(session);
-            setUser(session?.user ?? null);
+          (event, session) => {
+            if (event === "PASSWORD_RECOVERY") {
+              // Don't log the user in — show the reset password form instead
+              setIsPasswordRecovery(true);
+              setSession(session);
+              setUser(session?.user ?? null);
+            } else {
+              setSession(session);
+              setUser(session?.user ?? null);
+            }
           }
         );
 
@@ -102,6 +112,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
     configDB.clear();
   };
 
+  const clearPasswordRecovery = () => {
+    setIsPasswordRecovery(false);
+  };
+
   const signOut = async () => {
     if (supabaseClient) {
       await supabaseClient.auth.signOut();
@@ -125,6 +139,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
         session,
         isLoading,
         hasGemini,
+        isPasswordRecovery,
+        clearPasswordRecovery,
         updateConfig,
         clearConfig,
         signOut,
