@@ -62,7 +62,7 @@ export const CheatsheetEditor = ({ cheatsheetId, onBack, onOpenSettings }: Cheat
   const [language, setLanguage] = useState("javascript");
   const [customPrompt, setCustomPrompt] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
-  const [editingEntry, setEditingEntry] = useState<any>(null);
+  const [editingEntry, setEditingEntry] = useState(null);
   const [editSyntax, setEditSyntax] = useState("");
   const [editCategory, setEditCategory] = useState("");
   const [editDisplayFormat, setEditDisplayFormat] = useState<"card" | "table" | "compact">("card");
@@ -172,7 +172,7 @@ export const CheatsheetEditor = ({ cheatsheetId, onBack, onOpenSettings }: Cheat
     });
   };
 
-  const handleEdit = (entry: any) => {
+  const handleEdit = (entry) => {
     setEditingEntry(entry);
     setEditSyntax(entry.syntax);
     setEditCategory(entry.category);
@@ -415,7 +415,7 @@ export const CheatsheetEditor = ({ cheatsheetId, onBack, onOpenSettings }: Cheat
     }
 
     // Group entries by category
-    const grouped = entries.reduce((acc: any, entry: any) => {
+    const grouped = entries.reduce((acc, entry) => {
       const cat = entry.category || "Uncategorized";
       if (!acc[cat]) acc[cat] = [];
       acc[cat].push(entry);
@@ -424,7 +424,7 @@ export const CheatsheetEditor = ({ cheatsheetId, onBack, onOpenSettings }: Cheat
 
     let yPosition = cheatsheet?.description ? 35 : 28;
 
-    Object.entries(grouped).forEach(([category, categoryEntries]: [string, any]) => {
+    Object.entries(grouped).forEach(([category, categoryEntries]: [string, typeof entries]) => {
       // Check if we need a new page
       if (yPosition > 260) {
         doc.addPage();
@@ -437,11 +437,11 @@ export const CheatsheetEditor = ({ cheatsheetId, onBack, onOpenSettings }: Cheat
       yPosition += 7;
 
       // Check if all entries in this category use 'card' format
-      const allCards = categoryEntries.every((entry: any) => entry.display_format === 'card');
+      const allCards = categoryEntries.every((entry) => entry.display_format === 'card');
 
       if (allCards) {
         // Book-style format for cards
-        categoryEntries.forEach((entry: any, index: number) => {
+        categoryEntries.forEach((entry, index: number) => {
           // Check if we need a new page
           if (yPosition > 250) {
             doc.addPage();
@@ -517,7 +517,7 @@ export const CheatsheetEditor = ({ cheatsheetId, onBack, onOpenSettings }: Cheat
         yPosition += 4;
       } else {
         // Table format for non-card entries with custom drawing for syntax highlighting
-        categoryEntries.forEach((entry: any) => {
+        categoryEntries.forEach((entry) => {
           // Calculate row height based on content with proper column widths
           const syntaxColWidth = 41; // 45 - 4 padding
           const descColWidth = 51;   // 55 - 4 padding  
@@ -601,7 +601,7 @@ export const CheatsheetEditor = ({ cheatsheetId, onBack, onOpenSettings }: Cheat
   };
 
   // Group entries by category for display
-  const groupedEntries = entries?.reduce((acc: any, entry) => {
+  const groupedEntries = entries?.reduce((acc, entry) => {
     if (!acc[entry.category]) {
       acc[entry.category] = [];
     }
@@ -1012,7 +1012,10 @@ export const CheatsheetEditor = ({ cheatsheetId, onBack, onOpenSettings }: Cheat
                   </div>
                   <div>
                     <Label htmlFor="editDisplayFormat">Display Format</Label>
-                    <Select value={editDisplayFormat} onValueChange={(value: any) => setEditDisplayFormat(value)}>
+                    <Select
+                      value={editDisplayFormat}
+                      onValueChange={(value: "card" | "table" | "compact") => setEditDisplayFormat(value)}
+                    >
                       <SelectTrigger id="editDisplayFormat">
                         <SelectValue />
                       </SelectTrigger>
@@ -1145,11 +1148,11 @@ export const CheatsheetEditor = ({ cheatsheetId, onBack, onOpenSettings }: Cheat
           </Card>
         ) : (
           <div className="space-y-8">
-            {Object.entries(groupedEntries).map(([category, categoryEntries]: [string, any]) => {
+            {Object.entries(groupedEntries).map(([category, categoryEntries]: [string, typeof entries]) => {
               // Group by display format within category
-              const cardEntries = categoryEntries.filter((e: any) => e.display_format === "card" || !e.display_format);
-              const tableEntries = categoryEntries.filter((e: any) => e.display_format === "table");
-              const compactEntries = categoryEntries.filter((e: any) => e.display_format === "compact");
+              const cardEntries = categoryEntries.filter((e) => e?.display_format === "card" || !e?.display_format);
+              const tableEntries = categoryEntries.filter((e) => e?.display_format === "table");
+              const compactEntries = categoryEntries.filter((e) => e?.display_format === "compact");
 
               return (
                 <div key={category} className="animate-fade-in">
@@ -1169,19 +1172,19 @@ export const CheatsheetEditor = ({ cheatsheetId, onBack, onOpenSettings }: Cheat
                       onDragEnd={handleDragEnd}
                     >
                       <SortableContext
-                        items={cardEntries.map((e: any) => e.id)}
+                        items={cardEntries.map((e) => e.id)}
                         strategy={verticalListSortingStrategy}
                       >
                         <div className="flex flex-col gap-4 mb-6">
-                          {cardEntries.map((entry: any) => (
-                            <SortableCard
-                              key={entry.id}
-                              entry={entry}
-                              onEdit={handleEdit}
-                              onDelete={(id) => deleteMutation.mutate({ id, cheatsheet_id: cheatsheet.id })}
-                            />
-                          ))}
-                        </div>
+                            {cardEntries.map((entry) => (
+                              <SortableCard
+                                key={entry.id}
+                                entry={entry}
+                                onEdit={handleEdit}
+                                onDelete={(id) => deleteMutation.mutate({ id, cheatsheet_id: cheatsheet.id })}
+                              />
+                            ))}
+                          </div>
                       </SortableContext>
                     </DndContext>
                   )}
@@ -1196,22 +1199,22 @@ export const CheatsheetEditor = ({ cheatsheetId, onBack, onOpenSettings }: Cheat
                             collisionDetection={closestCenter}
                             onDragEnd={handleDragEnd}
                           >
-                            <table className="w-full">
+                            <table className="w-full table-fixed">
                               <thead>
                                 <tr className="border-b border-slate-800 bg-slate-800/30">
-                                  <th className="w-12"></th>
-                                  <th className="text-left p-3 font-semibold text-sm text-slate-300 w-1/5">Syntax</th>
-                                  <th className="text-left p-3 font-semibold text-sm text-slate-300 w-1/4">Description</th>
-                                  <th className="text-left p-3 font-semibold text-sm text-slate-300 w-1/2">Example</th>
-                                  <th className="w-20"></th>
+                                  <th className="w-10"></th>
+                                  <th className="text-left p-3 font-semibold text-sm text-slate-300 w-[120px]">Syntax</th>
+                                  <th className="text-left p-3 font-semibold text-sm text-slate-300 w-[180px]">Description</th>
+                                  <th className="text-left p-3 font-semibold text-sm text-slate-300">Example</th>
+                                  <th className="w-16"></th>
                                 </tr>
                               </thead>
                               <SortableContext
-                                items={tableEntries.map((e: any) => e.id)}
+                                items={tableEntries.map((e) => e.id)}
                                 strategy={verticalListSortingStrategy}
                               >
                                 <tbody>
-                                  {tableEntries.map((entry: any) => (
+                                  {tableEntries.map((entry) => (
                                     <SortableTableRow
                                       key={entry.id}
                                       entry={entry}
@@ -1238,11 +1241,11 @@ export const CheatsheetEditor = ({ cheatsheetId, onBack, onOpenSettings }: Cheat
                           onDragEnd={handleDragEnd}
                         >
                           <SortableContext
-                            items={compactEntries.map((e: any) => e.id)}
+                            items={compactEntries.map((e) => e.id)}
                             strategy={verticalListSortingStrategy}
                           >
                             <div className="space-y-2">
-                              {compactEntries.map((entry: any) => (
+                              {compactEntries.map((entry) => (
                                 <SortableCompactRow
                                   key={entry.id}
                                   entry={entry}

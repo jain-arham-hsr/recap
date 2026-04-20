@@ -46,7 +46,7 @@ export function useAIGenerate() {
 }
 
 CRITICAL: The description MUST be ONE LINE ONLY (maximum 15 words). Focus on the core purpose.
-The example should be a real-world usage scenario that shows the syntax in context.${formatGuidance}
+CRITICAL: The example MUST be properly formatted with real newline characters (\\n) between each statement, declaration, or logical step — never write the entire example as a single line. Format it exactly as it would appear in a real code editor, with each line on its own line. Multi-statement examples must always be multi-line.${formatGuidance}
 Detect the programming language from the syntax and category context, or use the provided language: ${language || 'javascript'}${customPrompt ? `\n\nAdditional user instructions: ${customPrompt}` : ''}`;
 
     const userMessage = customPrompt 
